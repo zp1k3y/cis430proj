@@ -4,6 +4,32 @@ import random as rd
 from sklearn.decomposition import PCA
 from sklearn import preprocessing
 import matplotlib.pyplot as plt
+#from pca4 import my_pca
+
+# PCA implementation
+def my_pca(X, n_components):
+    # Standardize the data
+    mean_vec = np.mean(X, axis=0)
+    standardized_X = X - mean_vec
+
+    # Calculate the covariance matrix
+    cov_matrix = np.cov(standardized_X, rowvar=False)
+
+    # Calculate eigenvalues and eigenvectors
+    eigenvalues, eigenvectors = np.linalg.eigh(cov_matrix)
+
+    # Sort eigenvalues and corresponding eigenvectors in descending order
+    idx = np.argsort(eigenvalues)[::-1]
+    eigenvalues = eigenvalues[idx]
+    eigenvectors = eigenvectors[:, idx]
+
+    # Select the top n_components eigenvectors
+    top_eigenvectors = eigenvectors[:, :n_components]
+
+    # Project the data onto the new subspace
+    projected_X = standardized_X.dot(top_eigenvectors)
+
+    return projected_X
 
 dataset = pd.read_csv('earthquake data.csv')
 
@@ -23,7 +49,10 @@ scaled_data = preprocessing.scale(dataset)
 
 pca = PCA()
 pca.fit(scaled_data)
-pca_data = pca.transform(scaled_data)
+#pca_data = pca.transform(scaled_data)
+
+#Using the written out pca implementation
+pca_data = my_pca(scaled_data, 4)
 
 per_var = np.round(pca.explained_variance_ratio_ * 100, decimals=1)
 labels = ['PC' + str(x) for x in range(1, len(per_var) + 1)]
